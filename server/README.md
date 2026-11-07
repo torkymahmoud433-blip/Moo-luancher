@@ -1,10 +1,10 @@
 # Moo Launcher API
 
-Node.js API for a single Android 12 redroid container.
+Node.js API for a single Android 12 ARM64 redroid container.
 
 ## Requirements
 
-- Linux host with Docker Engine.
+- ARM64 Linux host with Docker Engine (the API and Android container are pinned to linux/arm64).
 - Kernel binder support configured as described by the redroid deployment documentation.
 - A private Docker network named `moo-net` (created by Compose).
 - HTTPS reverse proxy in front of the API for remote browser access.
