@@ -1,31 +1,58 @@
-# Moo Launcher — Browser VM Lab
+# Moo Launcher — Android Cloud in Your Browser
 
-واجهة عربية لتجهيز وتشخيص صور أنظمة التشغيل قبل ربط محرك افتراضي يعمل داخل المتصفح.
+Moo Launcher is being built as a browser-based Android cloud environment inspired by virtual Android apps. The web page is hosted separately from the Android runtime.
 
-## الحالة الحالية
-- واجهة متجاوبة محسّنة لـ Chrome.
-- اختيار ملفات النظام والقرص وKernel وInitramfs وFirmware محليًا.
-- معلومات أولية عن المعمارية وحجم الملفات وسجل الفحص.
-- لا يتم رفع الملفات المختارة إلى أي خادم.
-- **محرك QEMU-Wasm غير مدمج بعد؛ لذلك لا يوجد إقلاع فعلي في هذه النسخة.**
+## Current implementation
 
-## المحرك المستهدف
-الخيار البحثي الأساسي هو [ktock/qemu-wasm](https://github.com/ktock/qemu-wasm)، وهو تعديل تجريبي لـ QEMU ليعمل عبر WebAssembly داخل المتصفح. يتطلب بناء ملفات JavaScript وWASM والـ worker وملفات BIOS/ROM وملفات النظام، ثم ربطها بواجهة Moo.
+- Responsive Arabic/English-ready browser dashboard.
+- Backend API protected by a bearer token.
+- Start, stop, and inspect one Android 12 redroid container.
+- Install an APK through the backend's private ADB connection.
+- Persistent Android data volume.
+- ADB is not published as a public host port.
+- **Browser screen streaming, touch/audio forwarding, user accounts, and multi-device isolation are not implemented yet.**
 
-## توافق Android
-لا يوجد ملف ROM واحد يناسب كل المحركات. يلزم معرفة:
-- هل الصورة ARM64/AArch64 أم x86_64؟
-- هل هي صورة قرص قابلة للإقلاع أم حزمة OTA/ZIP خاصة بتحديث هاتف؟
-- هل تتوفر ملفات boot/kernel وvendor وsystem وvbmeta المناسبة؟
-- هل إعدادات اللوحة الافتراضية والتخزين متوافقة مع Kernel؟
+## Architecture
 
-صور الهواتف لا تقلع تلقائيًا لمجرد اختيارها. كثير من رومات الهواتف تحتاج عتادًا افتراضيًا وتعريفات وboot chain خاصة بالجهاز. لا نعلن دعم Android 12 قبل نجاح اختبار إقلاع حقيقي.
+- **Frontend:** GitHub Pages or another HTTPS static host.
+- **API:** Node.js service in `server/`.
+- **Android runtime:** redroid Android 12 64-bit container on a Linux host with the required binder kernel support.
+- **Next milestone:** integrate an authenticated browser streaming/control bridge, then add per-user sessions and quotas.
 
-## النشر على Chrome
-المشروع صفحة ويب ثابتة، ويمكن نشره عبر GitHub Pages. بعد تفعيل Pages وتشغيل workflow بنجاح، سيكون الرابط:
-`https://torkymahmoud433-blip.github.io/Moo-luancher/`
+## Deploy the backend
 
-أفضل فرصة للتجربة ستكون على Chrome لسطح المكتب 64-bit مع ذاكرة كافية. قيود الذاكرة وSharedArrayBuffer وسياسات عزل المصدر قد تمنع بعض إعدادات QEMU متعددة الخيوط، كما أن أداء المحاكاة أبطأ من التشغيل الأصلي.
+This is a single-admin prototype, not a public multi-user service. Run it only on a server you control.
 
-## التشغيل المحلي
-افتح `index.html` من خادم محلي أو GitHub Pages. لا تعتمد على فتح الملف مباشرة إذا احتاج المحرك لاحقًا إلى WebAssembly workers أو إعدادات cross-origin isolation.
+1. Use a Linux host with Docker Engine and a kernel that supports the binder devices required by redroid.
+2. Configure the host kernel modules according to the [redroid deployment guide](https://github.com/remote-android/redroid-doc).
+3. Clone this repository on the server.
+4. Copy `.env.example` to `.env` and set a unique random `API_TOKEN` of at least 32 characters.
+5. Set `ALLOWED_ORIGINS` to the exact HTTPS origin of the deployed frontend, for example `https://your-name.github.io`.
+6. Start the API with `docker compose up -d --build`.
+7. Put the API behind an HTTPS reverse proxy. The Compose file binds the API to `127.0.0.1:8080` by default.
+
+The backend uses the Docker socket to manage a privileged Android container. Anyone who obtains the API token could control the Android instance and potentially affect the host. Keep the token private, use HTTPS, and do not expose the Docker socket or ADB port to the internet.
+
+## API
+
+All routes except health require `Authorization: Bearer <API_TOKEN>`.
+
+- `GET /api/health`
+- `GET /api/device/status`
+- `POST /api/device/start`
+- `POST /api/device/stop`
+- `POST /api/apps/install` with multipart field `apk`
+
+The Android container uses the internal Docker network `moo-net` and persistent volume `moo-android-data`. Its ADB service is only reached from the backend over that private network.
+
+## Screen streaming status
+
+The current API can start/stop Android and install APKs, but it does not yet stream the Android display into the browser. A separate browser bridge is required for video, audio, touch, keyboard, and clipboard. Candidate projects for evaluation include [Webscreen](https://github.com/huonwe/webscreen) and [ws-scrcpy-web](https://github.com/bilbospocketses/ws-scrcpy-web). They must be audited and integrated behind Moo's own authentication before public use.
+
+## Frontend
+
+The GitHub Pages workflow deploys the static frontend. Configure the API URL and bearer token in the dashboard at runtime. Do not hard-code secrets into `index.html`.
+
+## License and third-party components
+
+Moo Launcher is an independent project. redroid and any future streaming bridge retain their own licenses and notices. Review those licenses before redistribution.
