@@ -4,7 +4,7 @@ Moo Launcher is being built as a browser-based Android cloud environment inspire
 
 ## Current implementation
 
-- Responsive Arabic/English-ready browser dashboard.
+- Responsive Arabic browser dashboard.
 - Backend API protected by a bearer token.
 - Start, stop, and inspect one Android 12 redroid container.
 - Install an APK through the backend's private ADB connection.
@@ -26,10 +26,11 @@ This is a single-admin prototype, not a public multi-user service. Run it only o
 1. Use a Linux host with Docker Engine and a kernel that supports the binder devices required by redroid.
 2. Configure the host kernel modules according to the [redroid deployment guide](https://github.com/remote-android/redroid-doc).
 3. Clone this repository on the server.
-4. Copy `.env.example` to `.env` and set a unique random `API_TOKEN` of at least 32 characters.
-5. Set `ALLOWED_ORIGINS` to the exact HTTPS origin of the deployed frontend, for example `https://your-name.github.io`.
-6. Start the API with `docker compose up -d --build`.
-7. Put the API behind an HTTPS reverse proxy. The Compose file binds the API to `127.0.0.1:8080` by default.
+4. Copy `.env.example` to `.env`.
+5. Generate a private token with `openssl rand -hex 32` and set it as `API_TOKEN` in `.env`.
+6. Set `ALLOWED_ORIGINS` to the exact HTTPS origin of the deployed frontend, for example `https://your-name.github.io`.
+7. Start the API with `docker compose up -d --build`.
+8. Put the API behind an HTTPS reverse proxy. The Compose file binds the API to `127.0.0.1:8080` by default.
 
 The backend uses the Docker socket to manage a privileged Android container. Anyone who obtains the API token could control the Android instance and potentially affect the host. Keep the token private, use HTTPS, and do not expose the Docker socket or ADB port to the internet.
 
