@@ -6,7 +6,7 @@ Moo Launcher is being built as a browser-based Android cloud environment inspire
 
 - Responsive Arabic browser dashboard.
 - Backend API protected by a bearer token.
-- Start, stop, and inspect one Android 12 redroid container.
+- Start, stop, and inspect one Android 12 ARM64 redroid container.
 - Install an APK through the backend's private ADB connection.
 - Persistent Android data volume.
 - ADB is not published as a public host port.
@@ -16,7 +16,7 @@ Moo Launcher is being built as a browser-based Android cloud environment inspire
 
 - **Frontend:** GitHub Pages or another HTTPS static host.
 - **API:** Node.js service in `server/`.
-- **Android runtime:** redroid Android 12 64-bit container on a Linux host with the required binder kernel support.
+- **Android runtime:** redroid Android 12 ARM64 64-bit container on an ARM64 Linux host with the required binder kernel support.
 - **Next milestone:** integrate an authenticated browser streaming/control bridge, then add per-user sessions and quotas.
 
 ## Deploy the backend
