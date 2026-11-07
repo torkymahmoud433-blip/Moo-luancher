@@ -1,0 +1,29 @@
+services:
+  moo-api:
+    build: ./server
+    container_name: moo-api
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      API_TOKEN: ${API_TOKEN:?Set a long random API_TOKEN in .env}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      REDROID_IMAGE: redroid/redroid:12.0.0_64only-latest
+      REDROID_CONTAINER: moo-android
+      DOCKER_NETWORK: moo-net
+      DISPLAY_WIDTH: ${DISPLAY_WIDTH:-720}
+      DISPLAY_HEIGHT: ${DISPLAY_HEIGHT:-1280}
+      DISPLAY_DPI: ${DISPLAY_DPI:-320}
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - moo-net
+
+networks:
+  moo-net:
+    name: moo-net
+
+volumes:
+  moo-android-data:
+    name: moo-android-data
